@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    #__next {
+        min-height: 100vh !important;
+    }
+
+    body {
+        /*background: #121212;*/
+        min-height: 100vh !important;
+        /*color: white;*/
+        /*height: inherit;*/
+    }
+}
