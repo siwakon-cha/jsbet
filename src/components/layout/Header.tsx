@@ -29,7 +29,7 @@ const Header = () => {
   return (
     <Navbar position="static">
       <NavbarBrand className="cursor-pointer" onClick={() => router.push('/')}>
-        <p className="font-bold text-inherit">JsBet</p>
+        <p className="font-bold text-inherit">FiRoll</p>
       </NavbarBrand>
       <NavbarContent className="flex gap-4" justify="center">
         <NavbarItem isActive={checkActive('/sport')}>

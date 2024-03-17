@@ -41,7 +41,7 @@ function MyApp({ Component, pageProps }: any) {
   return (
     <div className="min-h-screen">
       <Head>
-        <title>js.bet</title>
+        <title>FiRoll</title>
       </Head>
       <WagmiProvider config={config}>
         <QueryClientProvider client={queryClient}>
