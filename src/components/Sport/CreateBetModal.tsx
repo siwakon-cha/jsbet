@@ -10,14 +10,16 @@ import { Input } from '@nextui-org/input';
 import { Button } from '@nextui-org/button';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import TextError from '@/components/TextError';
-import { JsBetContract } from '@/utils/wagmi/config';
+import { ApeTokenContract, JsBetContract } from '@/utils/wagmi/config';
 import {
+  useAccount,
   useReadContract,
   useWaitForTransactionReceipt,
   useWriteContract,
 } from 'wagmi';
 import { BaseError } from 'viem';
 import toast from 'react-hot-toast';
+import { ethers } from 'ethers';
 
 type Props = {
   isOpen: boolean;
@@ -33,10 +35,12 @@ type FormValues = {
 const CreateBetModal: React.FC<Props> = (props) => {
   const { writeContract, data: hash, error, isPending } = useWriteContract();
   const { isOpen, onClose, scheduleId } = props;
+  const { address } = useAccount();
   const {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm<FormValues>({
     mode: 'onChange',
     reValidateMode: 'onChange',
@@ -47,9 +51,20 @@ const CreateBetModal: React.FC<Props> = (props) => {
     functionName: 'getBetIds',
   });
 
+  const { data: apeBalance } = useReadContract({
+    ...ApeTokenContract,
+    functionName: 'balanceOf',
+    args: [`${address}`],
+  });
+
+  const { data: allowance } = useReadContract({
+    ...ApeTokenContract,
+    functionName: 'allowance',
+    args: [`${address}`, `${JsBetContract.address}`],
+  });
+
   const onSubmit: SubmitHandler<FormValues> = async (values) => {
     try {
-      console.log(values);
       const betId = betIds.length + 1;
       await writeContract({
         ...JsBetContract,
@@ -63,7 +78,7 @@ const CreateBetModal: React.FC<Props> = (props) => {
       // writeContractAsync();
     } catch (err) {
       console.error(err);
-      toast.error('create schedule failure!');
+      toast.error('transaction failure!');
     }
   };
 
@@ -75,9 +90,22 @@ const CreateBetModal: React.FC<Props> = (props) => {
   useEffect(() => {
     if (isConfirmed) {
       onClose();
-      toast.success('place bet success!');
+      toast.success('transaction success!');
     }
   }, [isConfirmed]);
+
+  async function onClick() {
+    try {
+      const amount = watch('amount');
+      await writeContract({
+        ...ApeTokenContract,
+        functionName: 'approve',
+        args: [`${JsBetContract.address}`, ethers.parseEther(amount)],
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
   return (
     <Modal isOpen={isOpen} onOpenChange={onClose}>
@@ -118,9 +146,26 @@ const CreateBetModal: React.FC<Props> = (props) => {
               <Button color="danger" variant="flat" onPress={onClose}>
                 Close
               </Button>
-              <Button color="primary" type="submit" disabled={isPending}>
-                {isPending ? 'Confirming...' : 'Bet'}
-              </Button>
+              {apeBalance &&
+              Number(ethers.formatUnits(apeBalance, 'ether')) > 0 ? (
+                Number(ethers.formatUnits(allowance, 'ether')) > 0 ? (
+                  <Button color="primary" type="submit" disabled={isPending}>
+                    {isPending ? 'Confirming...' : 'Bet'}
+                  </Button>
+                ) : (
+                  <Button
+                    color="primary"
+                    onClick={() => onClick()}
+                    disabled={isPending}
+                  >
+                    {isPending ? 'Confirming...' : 'Approve'}
+                  </Button>
+                )
+              ) : (
+                <Button color="primary" disabled={true}>
+                  Insufficient funds
+                </Button>
+              )}
             </ModalFooter>
           </form>
         )}

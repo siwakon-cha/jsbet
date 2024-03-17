@@ -52,7 +52,6 @@ const CreateScheduleModal: React.FC<Props> = (props) => {
 
   const onSubmit: SubmitHandler<FormValues> = async (values) => {
     try {
-      console.log(values);
       await writeContract({
         ...JsBetContract,
         functionName: 'createSchedule',

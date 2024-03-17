@@ -26,13 +26,6 @@ const Header = () => {
     return router.pathname === path;
   }
 
-  console.log(balance);
-  // function ConnectWallet() {
-  //   const { isConnected } = useAccount()
-  //   if (isConnected) return <Account />
-  //   return <WalletOptions />
-  // }
-
   return (
     <Navbar position="static">
       <NavbarBrand className="cursor-pointer" onClick={() => router.push('/')}>

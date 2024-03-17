@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
+  useAccount,
   useReadContract,
   useWaitForTransactionReceipt,
   useWriteContract,
@@ -34,6 +35,7 @@ type ScheduleData = {
 
 const MybetItem: React.FC<Props> = (props) => {
   const { betId } = props;
+  const { address } = useAccount();
   const { writeContract, data: hash, error } = useWriteContract();
   const [betData, setBetData] = useState<ScheduleData>({
     address: '',
@@ -108,7 +110,7 @@ const MybetItem: React.FC<Props> = (props) => {
     }
   }, [error]);
 
-  return betData.betId.toString() !== '0' ? (
+  return betData.betId.toString() !== '0' && betData.address === address ? (
     <Card>
       <CardHeader className="justify-between">
         <div className="flex gap-5">
